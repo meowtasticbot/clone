@@ -110,15 +110,15 @@ class Call(PyTgCalls):
 
     async def stop_stream_force(self, chat_id: int):
         try:
-        try:
             assistant = await self._get_call_client(chat_id)
             await assistant.leave_group_call(chat_id)
         except:
             pass
-            if config.STRING1:
+        if config.STRING1:
+            try:
                 await self.one.leave_group_call(chat_id)
-        except:
-            pass
+            except:
+                pass
         try:
             await _clear_(chat_id)
         except:
