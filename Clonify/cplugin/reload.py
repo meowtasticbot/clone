@@ -15,7 +15,8 @@ load_dotenv()
 from Clonify import app
 from Clonify.core.call import PRO
 from Clonify.misc import db
-from Clonify.utils.database import get_assistant, get_authuser_names, get_cmode
+from Clonify.utils.database import get_authuser_names, get_cmode
+from Clonify.utils.clone_assistant import get_clone_assistant
 from Clonify.utils.decorators import ActualAdminCB, AdminActual, language
 from Clonify.utils.formatters import alpha_to_int, get_readable_time
 from config import BANNED_USERS, adminlist, lyrical
@@ -75,7 +76,7 @@ async def restartbot(client, message: Message, _):
         await PRO.stop_stream_force(message.chat.id)
     except:
         pass
-    userbot = await get_assistant(message.chat.id)
+    userbot = await get_clone_assistant(client, message.chat.id)
     try:
         if message.chat.username:
             await userbot.resolve_peer(message.chat.username)
@@ -89,7 +90,7 @@ async def restartbot(client, message: Message, _):
             got = await client.get_chat(chat_id)
         except:
             pass
-        userbot = await get_assistant(chat_id)
+        userbot = await get_clone_assistant(client, chat_id)
         try:
             if got.username:
                 await userbot.resolve_peer(got.username)
