@@ -30,14 +30,6 @@ class PRO(Client):
             LOGGER(__name__).warning(
                 "LOGGER_ID is set to -100 (placeholder). Skipping startup log checks."
             )
-            except Exception as exc:
-                LOGGER(__name__).warning(
-                    "Assistant Account 1 could not send startup log to LOGGER_ID=%s. "
-                    "Please add/promote the assistant in your log group (or fix LOGGER_ID). "
-                    "Continuing startup without log-group notification. Error: %s",
-                    config.LOGGER_ID,
-                    exc,
-                )
         try:
             await self.send_message(
                 chat_id=logger_id,
