@@ -8,7 +8,7 @@ from pyrogram.errors import (
     UserNotParticipant,
 )
 import config
-from Clonify.utils.database import get_assistant
+from Clonify.utils.clone_assistant import get_clone_assistant
 from pyrogram import filters, Client
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from Clonify import YouTube, app
@@ -171,9 +171,9 @@ async def del_back_playlist(client, CallbackQuery, _):
 
 
 @Client.on_callback_query(filters.regex("unban_assistant"))
-async def unban_assistant(_, callback: CallbackQuery):
+async def unban_assistant(client, callback: CallbackQuery)
     chat_id = callback.message.chat.id
-    userbot = await get_assistant(chat_id)
+    userbot = await get_clone_assistant(client, chat_id
 
     try:
         await client.unban_chat_member(chat_id, userbot.id)
