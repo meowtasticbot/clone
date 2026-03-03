@@ -25,7 +25,7 @@ class PRO(Client):
         self.username = self.me.username
         self.mention = self.me.mention
 
-                logger_id = config.LOGGER_ID
+        logger_id = config.LOGGER_ID
         if str(logger_id).strip() == "-100":
             LOGGER(__name__).warning(
                 "LOGGER_ID is set to -100 (placeholder). Skipping startup log checks."
