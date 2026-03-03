@@ -25,14 +25,27 @@ class PRO(Client):
         self.username = self.me.username
         self.mention = self.me.mention
 
+                logger_id = config.LOGGER_ID
+        if str(logger_id).strip() == "-100":
+            LOGGER(__name__).warning(
+                "LOGGER_ID is set to -100 (placeholder). Skipping startup log checks."
+            )
+            LOGGER(__name__).info(f"Music Bot Started as {self.name}")
+            return
+
         try:
             await self.send_message(
-                chat_id=config.LOGGER_ID,
+                chat_id=logger_id,
                 text=f"<u><b>» {self.mention} ʙᴏᴛ sᴛᴀʀᴛᴇᴅ :</b><u>\n\nɪᴅ : <code>{self.id}</code>\nɴᴀᴍᴇ : {self.name}\nᴜsᴇʀɴᴀᴍᴇ : @{self.username}",
             )
         except (errors.ChannelInvalid, errors.PeerIdInvalid):
             LOGGER(__name__).error(
                 "Bot has failed to access the log group/channel. Make sure that you have added your bot to your log group/channel."
+            )
+            exit()
+        except ValueError:
+            LOGGER(__name__).error(
+                "LOGGER_ID is invalid. Use a proper channel/group ID (e.g. -100xxxxxxxxxx) or username."
             )
             exit()
         except Exception as ex:
@@ -41,7 +54,7 @@ class PRO(Client):
             )
             exit()
 
-        a = await self.get_chat_member(config.LOGGER_ID, self.id)
+        a = await self.get_chat_member(logger_id, self.id)
         if a.status != ChatMemberStatus.ADMINISTRATOR:
             LOGGER(__name__).error(
                 "Please promote your bot as an admin in your log group/channel."
