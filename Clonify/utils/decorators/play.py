@@ -11,6 +11,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from Clonify import YouTube, app
 from Clonify.misc import SUDOERS
+from Clonify.utils.clone_assistant import get_clone_assistant
 from Clonify.utils.database import (
     get_assistant,
     get_cmode,
