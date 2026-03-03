@@ -115,7 +115,7 @@ def PlayWrapper(command):
             fplay = None
 
         if not await is_active_chat(chat_id):
-            userbot = await get_assistant(chat_id)
+            userbot = await get_clone_assistant(client, chat_id)
             try:
                 try:
                     get = await app.get_chat_member(chat_id, userbot.id)
@@ -283,7 +283,7 @@ def CPlayWrapper(command):
             fplay = None
 
         if not await is_active_chat(chat_id):
-            userbot = await get_assistant(chat_id)
+            userbot = await get_clone_assistant(client, chat_id)
             try:
                 try:
                     get = await client.get_chat_member(chat_id, userbot.username)
