@@ -18,6 +18,7 @@ async def _build_client_from_string(bot_id: int, session_string: str) -> Client:
         api_id=API_ID,
         api_hash=API_HASH,
         session_string=session_string,
+        in_memory=True,
         no_updates=True,
     )
     await client.start()
