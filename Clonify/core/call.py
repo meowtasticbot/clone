@@ -24,7 +24,6 @@ from Clonify.utils.database import (
     add_active_video_chat,
     get_lang,
     get_loop,
-    group_assistant,
     is_autoend,
     music_on,
     remove_active_chat,
@@ -37,6 +36,7 @@ from Clonify.utils.inline.play import stream_markup
 from Clonify.utils.stream.autoclear import auto_clean
 from strings import get_string
 from Clonify.utils.thumbnails import get_thumb
+from Clonify.utils.clone_assistant import get_clone_assistant
 
 autoend = {}
 counter = {}
@@ -60,17 +60,48 @@ class Call(PyTgCalls):
             self.userbot1,
             cache_duration=150,
         )
+        self._dynamic_calls = {}
+
+    async def _get_call_client(self, chat_id: int):
+        user_client = await get_clone_assistant(app, chat_id)
+        user_id = user_client.id
+
+        default_user_id = getattr(getattr(self.userbot1, "me", None), "id", None)
+        if default_user_id and user_id == default_user_id:
+            return self.one
+
+        call_client = self._dynamic_calls.get(user_id)
+        if call_client:
+            return call_client
+
+        call_client = PyTgCalls(user_client, cache_duration=150)
+        await call_client.start()
+
+        @call_client.on_kicked()
+        @call_client.on_closed_voice_chat()
+        @call_client.on_left()
+        async def stream_services_handler(_, stream_chat_id: int):
+            await self.stop_stream(stream_chat_id)
+
+        @call_client.on_stream_end()
+        async def stream_end_handler(client, update: Update):
+            if not isinstance(update, StreamAudioEnded):
+                return
+            await self.change_stream(client, update.chat_id)
+
+        self._dynamic_calls[user_id] = call_client
+        return call_client
 
     async def pause_stream(self, chat_id: int):
-        assistant = await group_assistant(self, chat_id)
+        assistant = await self._get_call_client(chat_id)
         await assistant.pause_stream(chat_id)
 
     async def resume_stream(self, chat_id: int):
-        assistant = await group_assistant(self, chat_id)
+        assistant = await self._get_call_client(chat_id)
         await assistant.resume_stream(chat_id)
 
     async def stop_stream(self, chat_id: int):
-        assistant = await group_assistant(self, chat_id)
+        assistant = await self._get_call_client(chat_id)
         try:
             await _clear_(chat_id)
             await assistant.leave_group_call(chat_id)
@@ -79,6 +110,11 @@ class Call(PyTgCalls):
 
     async def stop_stream_force(self, chat_id: int):
         try:
+        try:
+            assistant = await self._get_call_client(chat_id)
+            await assistant.leave_group_call(chat_id)
+        except:
+            pass
             if config.STRING1:
                 await self.one.leave_group_call(chat_id)
         except:
@@ -89,7 +125,7 @@ class Call(PyTgCalls):
             pass
 
     async def speedup_stream(self, chat_id: int, file_path, speed, playing):
-        assistant = await group_assistant(self, chat_id)
+        assistant = await self._get_call_client(chat_id)
         if str(speed) != str("1.0"):
             base = os.path.basename(file_path)
             chatdir = os.path.join(os.getcwd(), "playback", str(speed))
@@ -158,7 +194,7 @@ class Call(PyTgCalls):
             db[chat_id][0]["speed"] = speed
 
     async def force_stop_stream(self, chat_id: int):
-        assistant = await group_assistant(self, chat_id)
+        assistant = await self._get_call_client(chat_id)
         try:
             check = db.get(chat_id)
             check.pop(0)
@@ -193,7 +229,7 @@ class Call(PyTgCalls):
         )
 
     async def seek_stream(self, chat_id, file_path, to_seek, duration, mode):
-        assistant = await group_assistant(self, chat_id)
+        assistant = await self._get_call_client(chat_id)
         stream = (
             AudioVideoPiped(
                 file_path,
@@ -211,7 +247,7 @@ class Call(PyTgCalls):
         await assistant.change_stream(chat_id, stream)
 
     async def stream_call(self, link):
-        assistant = await group_assistant(self, config.LOGGER_ID)
+        assistant = await self._get_call_client(config.LOGGER_ID)
         await assistant.join_group_call(
             config.LOGGER_ID,
             AudioVideoPiped(link),
@@ -228,7 +264,7 @@ class Call(PyTgCalls):
         video: Union[bool, str] = None,
         image: Union[bool, str] = None,
     ):
-        assistant = await group_assistant(self, chat_id)
+        assistant = await self._get_call_client(chat_id)
         language = await get_lang(chat_id)
         _ = get_string(language)
         if video:
