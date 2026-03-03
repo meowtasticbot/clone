@@ -171,9 +171,9 @@ async def del_back_playlist(client, CallbackQuery, _):
 
 
 @Client.on_callback_query(filters.regex("unban_assistant"))
-async def unban_assistant(client, callback: CallbackQuery)
+async def unban_assistant(client, callback: CallbackQuery):
     chat_id = callback.message.chat.id
-    userbot = await get_clone_assistant(client, chat_id
+    userbot = await get_clone_assistant(client, chat_id)
 
     try:
         await client.unban_chat_member(chat_id, userbot.id)
